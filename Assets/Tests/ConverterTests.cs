@@ -1,7 +1,12 @@
+using NUnit.Framework;
+
 namespace Homework
 {
     public sealed class ConverterTests
     {
-        //TODO: Написать конвертер ресурсов по TDD
+        [Test]
+        public void Test()
+        {
+        }
     }
 }

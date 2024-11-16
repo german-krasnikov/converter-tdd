@@ -25,6 +25,8 @@ namespace Homework
     
     public sealed class Converter
     {
-        //TODO: Написать конвертер ресурсов по TDD
+        public void Update(float deltaTime)
+        {
+        }
     }
 }
