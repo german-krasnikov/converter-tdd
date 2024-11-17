@@ -15,11 +15,6 @@ namespace Modules.Converter
             _interval = interval;
         }
 
-        public void Start()
-        {
-            _time = 0;
-        }
-
         public void Tick(float deltaTime)
         {
             if (deltaTime <= 0) throw new ArgumentException();
@@ -32,7 +27,7 @@ namespace Modules.Converter
             }
         }
 
-        public void Stop()
+        public void Reset()
         {
             _time = 0;
         }

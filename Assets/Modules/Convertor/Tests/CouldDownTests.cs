@@ -19,7 +19,6 @@ namespace Modules.Converter.Tests
             var couldDown = new CouldDown(interval);
             var completeCount = 0;
             couldDown.OnComplete += () => completeCount++;
-            couldDown.Start();
 
             couldDown.Tick(deltaTime);
 
@@ -36,6 +35,20 @@ namespace Modules.Converter.Tests
             var couldDown = new CouldDown(1);
             
             Assert.Throws<ArgumentException>(() => couldDown.Tick(deltaTime));
+        }
+        
+        [Test]
+        public void WhenResetThenTimeIsZero()
+        {
+            var couldDown = new CouldDown(3);
+            var completeCount = 0;
+            couldDown.OnComplete += () => completeCount++;
+            
+            couldDown.Tick(2);
+            couldDown.Reset();
+            couldDown.Tick(2);
+            
+            Assert.AreEqual(completeCount, 0);
         }
     }
 }

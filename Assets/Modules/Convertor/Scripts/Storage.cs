@@ -19,7 +19,12 @@ namespace Modules.Converter
         {
             if (count < 0) throw new ArgumentException();
             var addedCount = Math.Min(count, _maxSize - GetItemCount(item) - Count());
-            _items.Add(item, addedCount);
+
+            if (!_items.TryAdd(item, addedCount))
+            {
+                _items[item] += addedCount;
+            }
+
             return count - addedCount;
         }
 

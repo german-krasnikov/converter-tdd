@@ -29,6 +29,18 @@ namespace Modules.Converter.Tests
             Assert.AreEqual(storage.GetItemCount(ItemType.Wood), expectedItemCount);
             Assert.AreEqual(actualReturnCount, expectedReturnCount);
         }
+        
+        [Test]
+        public void AddItemFewTimes()
+        {
+            var storage = new Storage(5);
+
+            storage.AddItem(ItemType.Wood, 1);
+            storage.AddItem(ItemType.Wood, 1);
+            storage.AddItem(ItemType.Wood, 1);
+
+            Assert.AreEqual(storage.GetItemCount(ItemType.Wood), 3);
+        }
 
         [TestCaseSource(nameof(RemoveItemSource))]
         public void RemoveItem(int size, int itemCount, int removeCount, int expectedItemCount, bool expectedResult)

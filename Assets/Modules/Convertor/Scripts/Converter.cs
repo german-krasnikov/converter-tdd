@@ -1,7 +1,4 @@
 using System;
-using System.Runtime.CompilerServices;
-
-[assembly: InternalsVisibleTo("Modules.Converter.Tests")]
 
 namespace Modules.Converter
 {
@@ -32,7 +29,8 @@ namespace Modules.Converter
         public event Action<ItemType, int> OnSourceAdded;
         public event Action<ItemType, int> OnSourceRemoved;
         public event Action<ItemType, int> OnTargetRemoved;
-        public event Action<ItemType, int> OnConverted;
+        public event Action<ConvertReceipt> OnConverted;
+        public event Action<ConvertReceipt> OnStartConverting;
         public event Action<bool> OnEnableChanged;
 
         private Storage _targetStorage;
@@ -40,9 +38,12 @@ namespace Modules.Converter
         private bool _enabled;
         private ConvertReceipt _receipt;
         private CouldDown _couldDown;
+        private int _convertingCount;
 
+        public int ConvertingCount => _convertingCount;
         public bool IsEnabled => _enabled;
         public int MaxSize => _targetStorage.MaxSize;
+        public bool IsInProgress => _enabled && ConvertingCount != 0;
 
         public Converter(int maxSize, ConvertReceipt receipt)
         {
@@ -64,6 +65,7 @@ namespace Modules.Converter
             if (_enabled == enabled) return;
             _enabled = enabled;
             OnEnableChanged?.Invoke(enabled);
+            CheckStartConverting();
         }
 
         public int AddSourceItem(ItemType itemType, int addCount)
@@ -74,6 +76,14 @@ namespace Modules.Converter
             if (returnCount != addCount)
             {
                 OnSourceAdded?.Invoke(itemType, returnCount);
+            }
+
+            var wasInProgress = IsInProgress;
+            CheckStartConverting();
+
+            if (returnCount > 0 && IsInProgress && !wasInProgress)
+            {
+                returnCount = _sourceStorage.AddItem(itemType, returnCount);
             }
 
             return returnCount;
@@ -112,26 +122,38 @@ namespace Modules.Converter
             return result;
         }
 
-        private void CouldDown()
-        {
-            Convert();
-        }
-
         internal bool Convert()
         {
             if (!CanConvert()) return false;
 
             _sourceStorage.RemoveItem(_receipt.SourceType, _receipt.SourceCount);
             _targetStorage.AddItem(_receipt.TargetType, _receipt.TargetCount);
-            OnConverted?.Invoke(_receipt.TargetType, _receipt.TargetCount);
+            _convertingCount = 0;
+            OnConverted?.Invoke(_receipt);
+            CheckStartConverting();
             return true;
         }
 
-        internal bool CanConvert()
+        internal void CheckStartConverting()
+        {
+            if (IsEnabled && !IsInProgress && CanConvert())
+            {
+                _convertingCount = _receipt.SourceCount;
+                _sourceStorage.RemoveItem(_receipt.SourceType, _receipt.SourceCount);
+                OnStartConverting?.Invoke(_receipt);
+            }
+        }
+
+        private bool CanConvert()
         {
             if (GetSourceItemCount() < _receipt.SourceCount) return false;
             if (GetTargetItemCount() + _receipt.TargetCount > MaxSize) return false;
             return true;
+        }
+
+        private void CouldDown()
+        {
+            Convert();
         }
     }
 }
