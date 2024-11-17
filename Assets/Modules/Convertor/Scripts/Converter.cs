@@ -65,7 +65,15 @@ namespace Modules.Converter
             if (_enabled == enabled) return;
             _enabled = enabled;
             OnEnableChanged?.Invoke(enabled);
-            CheckStartConverting();
+
+            if (enabled)
+            {
+                CheckStartConverting();
+            }
+            else
+            {
+                Stop();
+            }
         }
 
         public int AddSourceItem(ItemType itemType, int addCount)
@@ -108,7 +116,7 @@ namespace Modules.Converter
 
         public int GetTargetItemCount()
         {
-            return _sourceStorage.GetItemCount(_receipt.TargetType);
+            return _targetStorage.GetItemCount(_receipt.TargetType);
         }
 
         public bool RemoveSourceItem(ItemType itemType, int count)
@@ -128,12 +136,22 @@ namespace Modules.Converter
         {
             if (!CanConvert()) return false;
 
-            _sourceStorage.RemoveItem(_receipt.SourceType, _receipt.SourceCount);
             _targetStorage.AddItem(_receipt.TargetType, _receipt.TargetCount);
             _convertingCount = 0;
             OnConverted?.Invoke(_receipt);
             CheckStartConverting();
             return true;
+        }
+
+        internal void Stop()
+        {
+            _couldDown.Reset();
+
+            if (IsInProgress)
+            {
+                _sourceStorage.AddItem(_receipt.SourceType, _convertingCount);
+                _convertingCount = 0;
+            }
         }
 
         internal void CheckStartConverting()
@@ -146,11 +164,18 @@ namespace Modules.Converter
             }
         }
 
-        internal bool NeedStartConverting() => IsEnabled && !IsInProgress && CanConvert();
+        internal bool NeedStartConverting() => IsEnabled && !IsInProgress && CanConvertNext();
 
-        private bool CanConvert()
+        internal bool CanConvertNext()
         {
             if (GetSourceItemCount() < _receipt.SourceCount) return false;
+            if (GetTargetItemCount() + _receipt.TargetCount > MaxSize) return false;
+            return true;
+        }
+        
+        internal bool CanConvert()
+        {
+            if (_convertingCount != _receipt.SourceCount) return false;
             if (GetTargetItemCount() + _receipt.TargetCount > MaxSize) return false;
             return true;
         }

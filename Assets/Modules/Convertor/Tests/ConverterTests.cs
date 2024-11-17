@@ -45,7 +45,7 @@ namespace Modules.Converter.Tests
             Assert.AreEqual(expectedReturnCount, returnCount);
             Assert.AreEqual(expectedEventTriggered, eventTriggered);
         }
-        
+
         [TestCaseSource(nameof(AddItemSourceSource))]
         public void AddItemSourceEvent(bool isEnabled, int size, ConvertReceipt receipt, ItemType itemType, int addCount,
             int expectedSourceItemCount, int expectedReturnCount, int expectConvertingCount, bool expectedEventTriggered)
@@ -111,6 +111,7 @@ namespace Modules.Converter.Tests
             int expectedTargetCount, bool expectedResult, bool expectedEventTriggered)
         {
             var converter = new Converter(size, new ConvertReceipt(sourceType, targetType, sourceCount, targetCount, time));
+            converter.SetEnabled(true);
             converter.AddSourceItem(sourceType, addSourceCount);
             var eventTriggered = false;
             converter.OnConverted += _ => { eventTriggered = true; };
@@ -185,6 +186,80 @@ namespace Modules.Converter.Tests
             Assert.AreEqual(expectedEventTriggered, eventTriggered);
             Assert.AreEqual(expectedSourceCount, converter.GetSourceItemCount());
             Assert.AreEqual(expectedConvertingCount, converter.ConvertingCount);
+        }
+
+        [Test]
+        public void RemoveTarget()
+        {
+            Assert.AreEqual(true, false);
+        }
+
+        [Test]
+        public void Stop()
+        {
+            Assert.AreEqual(true, false);
+        }
+
+        [Test]
+        public void CanConvert()
+        {
+            Assert.AreEqual(true, false);
+        }
+
+        [Test]
+        public void CanConvertNext()
+        {
+            Assert.AreEqual(true, false);
+        }
+
+        [Test]
+        public void ConvertOneItemPositiveCase()
+        {
+            var converter = new Converter(10, DefaultWoodPlankReceipt);
+            converter.SetEnabled(true);
+            var onStartConvertingTriggered = false;
+            converter.OnStartConverting += _ => { onStartConvertingTriggered = true; };
+            var onConvertedTriggered = false;
+            converter.OnConverted += _ => { onConvertedTriggered = true; };
+            var onSourceAddedTriggered = false;
+            converter.OnSourceAdded += (_, _) => { onSourceAddedTriggered = true; };
+            converter.AddSourceItem(DefaultSourceType, DefaultSourceCount);
+
+            converter.Update(DefaultTime);
+
+            Assert.AreEqual(converter.GetSourceItemCount(), 0);
+            Assert.AreEqual(converter.GetTargetItemCount(), DefaultTargetCount);
+            Assert.AreEqual(converter.ConvertingCount, 0);
+            Assert.AreEqual(converter.IsInProgress, false);
+            Assert.AreEqual(onStartConvertingTriggered, true);
+            Assert.AreEqual(onSourceAddedTriggered, true);
+            Assert.AreEqual(onConvertedTriggered, true);
+        }
+
+        [Test]
+        public void ConvertTwoItemPositiveCase()
+        {
+            var converter = new Converter(10, DefaultWoodPlankReceipt);
+            converter.SetEnabled(true);
+            var onStartConvertingTriggered = false;
+            converter.OnStartConverting += _ => { onStartConvertingTriggered = true; };
+            var onConvertedTriggered = false;
+            converter.OnConverted += _ => { onConvertedTriggered = true; };
+            var onSourceAddedTriggered = false;
+            converter.OnSourceAdded += (_, _) => { onSourceAddedTriggered = true; };
+            converter.AddSourceItem(DefaultSourceType, DefaultSourceCount);
+            converter.AddSourceItem(DefaultSourceType, DefaultSourceCount);
+
+            converter.Update(DefaultTime);
+            converter.Update(DefaultTime);
+
+            Assert.AreEqual(converter.GetSourceItemCount(), 0);
+            Assert.AreEqual(converter.GetTargetItemCount(), DefaultTargetCount * 2);
+            Assert.AreEqual(converter.ConvertingCount, 0);
+            Assert.AreEqual(converter.IsInProgress, false);
+            Assert.AreEqual(onStartConvertingTriggered, true);
+            Assert.AreEqual(onSourceAddedTriggered, true);
+            Assert.AreEqual(onConvertedTriggered, true);
         }
     }
 }
