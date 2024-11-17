@@ -26,12 +26,46 @@ namespace Homework
      */
     public sealed class Converter
     {
-        public event Action<ItemType, int> ItemAdded;
-        private Storage _storage = new Storage(10);
-        private Storage _sources = new Storage(10);
+        public event Action<ItemType, int> OnAdded;
+        public event Action<ItemType, int> OnRemoved;
+        public event Action<ItemType> Converted;
+        public event Action<bool> OnEnableChanged;
+
+        private Storage _convertStorage;
+        private Storage _sourceStorage;
+        private float _couldDown;
+        private bool _enabled;
+        private ConvertReceipt _receipt;
+
+        public bool IsEnabled => _enabled;
+        public float Time => _receipt.Time;
+
+        public Converter(int maxSize, ConvertReceipt receipt)
+        {
+            _convertStorage = new Storage(maxSize);
+            _sourceStorage = new Storage(maxSize);
+            _receipt = receipt;
+        }
 
         public void Update(float deltaTime)
         {
+        }
+
+        public void SetEnabled(bool enabled)
+        {
+            _enabled = enabled;
+            OnEnableChanged?.Invoke(enabled);
+        }
+
+        public int AddSourceItem(ItemType itemType, int addCount)
+        {
+            if (itemType != _receipt.SourceType) return addCount;
+            return _sourceStorage.AddItem(itemType, addCount);
+        }
+
+        public int GetSourceItemCount(ItemType itemType)
+        {
+            return _sourceStorage.GetItemCount(itemType);
         }
     }
 }
