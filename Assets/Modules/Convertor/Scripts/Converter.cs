@@ -37,12 +37,11 @@ namespace Modules.Converter
 
         private Storage _targetStorage;
         private Storage _sourceStorage;
-        private float _couldDown;
         private bool _enabled;
         private ConvertReceipt _receipt;
+        private CouldDown _couldDown;
 
         public bool IsEnabled => _enabled;
-        public float Time => _receipt.Time;
         public int MaxSize => _targetStorage.MaxSize;
 
         public Converter(int maxSize, ConvertReceipt receipt)
@@ -50,27 +49,14 @@ namespace Modules.Converter
             _targetStorage = new Storage(maxSize);
             _sourceStorage = new Storage(maxSize);
             _receipt = receipt;
+            _couldDown = new CouldDown(receipt.Time);
+            _couldDown.OnComplete += CouldDown;
         }
 
         public void Update(float deltaTime)
         {
-        }
-
-        internal bool Convert()
-        {
-            if (!CanConvert()) return false;
-
-            _sourceStorage.RemoveItem(_receipt.SourceType, _receipt.SourceCount);
-            _targetStorage.AddItem(_receipt.TargetType, _receipt.TargetCount);
-            OnConverted?.Invoke(_receipt.TargetType, _receipt.TargetCount);
-            return true;
-        }
-
-        internal bool CanConvert()
-        {
-            if (GetSourceItemCount() < _receipt.SourceCount) return false;
-            if (GetTargetItemCount() + _receipt.TargetCount > MaxSize) return false;
-            return true;
+            if (!_enabled) return;
+            _couldDown.Tick(deltaTime);
         }
 
         public void SetEnabled(bool enabled)
@@ -124,6 +110,28 @@ namespace Modules.Converter
             }
 
             return result;
+        }
+
+        private void CouldDown()
+        {
+            Convert();
+        }
+
+        internal bool Convert()
+        {
+            if (!CanConvert()) return false;
+
+            _sourceStorage.RemoveItem(_receipt.SourceType, _receipt.SourceCount);
+            _targetStorage.AddItem(_receipt.TargetType, _receipt.TargetCount);
+            OnConverted?.Invoke(_receipt.TargetType, _receipt.TargetCount);
+            return true;
+        }
+
+        internal bool CanConvert()
+        {
+            if (GetSourceItemCount() < _receipt.SourceCount) return false;
+            if (GetTargetItemCount() + _receipt.TargetCount > MaxSize) return false;
+            return true;
         }
     }
 }
