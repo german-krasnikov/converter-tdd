@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Homework
@@ -12,14 +13,17 @@ namespace Homework
             _maxSize = maxSize;
         }
 
-        public void AddItem(ItemType item, int count)
+        public int AddItem(ItemType item, int count)
         {
-            _items.Add(item, count);
+            var addedCount = Math.Min(count, _maxSize - GetItemCount(item) - Count());
+            _items.Add(item, addedCount);
+            return count - addedCount;
         }
 
         public int GetItemCount(ItemType item)
         {
-            return _items[item];
+            _items.TryGetValue(item, out var result);
+            return result;
         }
 
         public int Count()
