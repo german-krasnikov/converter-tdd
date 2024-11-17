@@ -60,7 +60,14 @@ namespace Homework
         public int AddSourceItem(ItemType itemType, int addCount)
         {
             if (itemType != _receipt.SourceType) return addCount;
-            return _sourceStorage.AddItem(itemType, addCount);
+            var returnCount = _sourceStorage.AddItem(itemType, addCount);
+
+            if (returnCount != addCount)
+            {
+                OnAdded?.Invoke(itemType, returnCount);
+            }
+
+            return returnCount;
         }
 
         public int GetSourceItemCount(ItemType itemType)
