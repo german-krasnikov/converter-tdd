@@ -26,6 +26,14 @@ namespace Homework
             return result;
         }
 
+        public bool RemoveItem(ItemType item, int removeCount)
+        {
+            var count = GetItemCount(item);
+            if (removeCount > count) return false;
+            _items[item] -= removeCount;
+            return true;
+        }
+
         public int Count()
         {
             var result = 0;
