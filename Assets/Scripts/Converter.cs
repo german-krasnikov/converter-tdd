@@ -26,12 +26,13 @@ namespace Homework
      */
     public sealed class Converter
     {
-        public event Action<ItemType, int> OnAdded;
-        public event Action<ItemType, int> OnRemoved;
-        public event Action<ItemType> Converted;
+        public event Action<ItemType, int> OnSourceAdded;
+        public event Action<ItemType, int> OnSourceRemoved;
+        public event Action<ItemType, int> OnConvertedRemoved;
+        public event Action<ItemType, int> OnConverted;
         public event Action<bool> OnEnableChanged;
 
-        private Storage _convertStorage;
+        private Storage _convertedStorage;
         private Storage _sourceStorage;
         private float _couldDown;
         private bool _enabled;
@@ -42,7 +43,7 @@ namespace Homework
 
         public Converter(int maxSize, ConvertReceipt receipt)
         {
-            _convertStorage = new Storage(maxSize);
+            _convertedStorage = new Storage(maxSize);
             _sourceStorage = new Storage(maxSize);
             _receipt = receipt;
         }
@@ -53,6 +54,7 @@ namespace Homework
 
         public void SetEnabled(bool enabled)
         {
+            if (_enabled == enabled) return;
             _enabled = enabled;
             OnEnableChanged?.Invoke(enabled);
         }
@@ -64,7 +66,7 @@ namespace Homework
 
             if (returnCount != addCount)
             {
-                OnAdded?.Invoke(itemType, returnCount);
+                OnSourceAdded?.Invoke(itemType, returnCount);
             }
 
             return returnCount;
@@ -73,6 +75,19 @@ namespace Homework
         public int GetSourceItemCount(ItemType itemType)
         {
             return _sourceStorage.GetItemCount(itemType);
+        }
+
+        public bool RemoveSourceItem(ItemType itemType, int count)
+        {
+            if (itemType != _receipt.SourceType) return false;
+            var result = _sourceStorage.RemoveItem(itemType, count);
+
+            if (result)
+            {
+                OnSourceRemoved?.Invoke(itemType, count);
+            }
+
+            return result;
         }
     }
 }
