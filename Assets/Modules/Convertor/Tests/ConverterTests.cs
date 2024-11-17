@@ -151,30 +151,31 @@ namespace Modules.Converter.Tests
             Assert.AreEqual(expectedResult, result);
         }
 
-        private static IEnumerable NeedStartConvertingSource1() => new object[]
+        private static IEnumerable CheckStartConvertingSource() => new object[]
         {
             new object[] { 5, 1, false, false, false, 1, 0, false },
             new object[] { 10, 5, false, false, false, 5, 0, false },
             new object[] { 10, 5, true, false, false, 0, 5, true },
+            new object[] { 10, 5, true, true, false, 5, 5, false },
         }.FormatAsObjects(args =>
             $"Size: {args[0]}; addSourceCount: {args[1]}; isEnabled: {args[2]}; isInProgress: {args[3]}; " +
             $"expectedResult: {args[4]}; expectedConvertingCount: {args[5]}, eventTriggered: {args[6]}");
 
-        [TestCaseSource(nameof(NeedStartConvertingSource1))]
-        public void NeedStartConverting1(int size, int addSourceCount, bool isEnabled, bool isInProgress, bool expectedResult,
+        [TestCaseSource(nameof(CheckStartConvertingSource))]
+        public void CheckStartConverting(int size, int addSourceCount, bool isEnabled, bool isInProgress, bool expectedResult,
             int expectedSourceCount, int expectedConvertingCount, bool expectedEventTriggered)
         {
             //ARRANGE
             var converter = new Converter(size, DefaultWoodPlankReceipt);
             converter.SetEnabled(isEnabled);
-            var eventTriggered = false;
-            converter.OnStartConverting += _ => { eventTriggered = true; };
 
             if (isInProgress)
             {
                 converter.AddSourceItem(DefaultSourceType, DefaultSourceCount);
             }
 
+            var eventTriggered = false;
+            converter.OnStartConverting += _ => { eventTriggered = true; };
             converter.AddSourceItem(DefaultSourceType, addSourceCount);
 
             //ACT
