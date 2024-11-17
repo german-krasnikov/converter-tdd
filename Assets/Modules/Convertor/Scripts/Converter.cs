@@ -72,11 +72,7 @@ namespace Modules.Converter
         {
             if (itemType != _receipt.SourceType) return addCount;
             var returnCount = _sourceStorage.AddItem(itemType, addCount);
-
-            if (returnCount != addCount)
-            {
-                OnSourceAdded?.Invoke(itemType, returnCount);
-            }
+            var added = addCount - returnCount;
 
             var wasInProgress = IsInProgress;
             CheckStartConverting();
@@ -84,6 +80,12 @@ namespace Modules.Converter
             if (returnCount > 0 && IsInProgress && !wasInProgress)
             {
                 returnCount = _sourceStorage.AddItem(itemType, returnCount);
+                added = addCount - returnCount;
+            }
+
+            if (returnCount != addCount)
+            {
+                OnSourceAdded?.Invoke(itemType, added);
             }
 
             return returnCount;
@@ -136,13 +138,15 @@ namespace Modules.Converter
 
         internal void CheckStartConverting()
         {
-            if (IsEnabled && !IsInProgress && CanConvert())
+            if (NeedStartConverting())
             {
                 _convertingCount = _receipt.SourceCount;
                 _sourceStorage.RemoveItem(_receipt.SourceType, _receipt.SourceCount);
                 OnStartConverting?.Invoke(_receipt);
             }
         }
+
+        internal bool NeedStartConverting() => IsEnabled && !IsInProgress && CanConvert();
 
         private bool CanConvert()
         {

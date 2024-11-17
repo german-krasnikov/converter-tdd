@@ -45,6 +45,23 @@ namespace Modules.Converter.Tests
             Assert.AreEqual(expectedReturnCount, returnCount);
             Assert.AreEqual(expectedEventTriggered, eventTriggered);
         }
+        
+        [TestCaseSource(nameof(AddItemSourceSource))]
+        public void AddItemSourceEvent(bool isEnabled, int size, ConvertReceipt receipt, ItemType itemType, int addCount,
+            int expectedSourceItemCount, int expectedReturnCount, int expectConvertingCount, bool expectedEventTriggered)
+        {
+            var converter = new Converter(size, DefaultWoodPlankReceipt);
+            var eventTriggered = false;
+            converter.SetEnabled(isEnabled);
+            converter.OnSourceAdded += (_, _) => { eventTriggered = true; };
+
+            var returnCount = converter.AddSourceItem(itemType, addCount);
+
+            Assert.AreEqual(expectedSourceItemCount, converter.GetSourceItemCount(itemType));
+            Assert.AreEqual(expectConvertingCount, converter.ConvertingCount);
+            Assert.AreEqual(expectedReturnCount, returnCount);
+            Assert.AreEqual(expectedEventTriggered, eventTriggered);
+        }
 
         private static IEnumerable RemoveItemSourceSource() => new object[]
         {
@@ -103,6 +120,70 @@ namespace Modules.Converter.Tests
             Assert.AreEqual(expectedResult, result);
             Assert.AreEqual(expectedEventTriggered, eventTriggered);
             Assert.AreEqual(expectedTargetCount, converter.GetTargetItemCount(targetType));
+        }
+
+        private static IEnumerable NeedStartConvertingSource() => new object[]
+        {
+            new object[] { 5, 1, false, false, false, false },
+            new object[] { 10, 5, false, false, false, false },
+            new object[] { 10, 5, true, false, false, true },
+        }.FormatAsObjects(args =>
+            $"Size: {args[0]}; addSourceCount: {args[1]}; isEnabled: {args[2]}; isInProgress: {args[3]}; expectedResult: {args[4]}");
+
+        [TestCaseSource(nameof(NeedStartConvertingSource))]
+        public void NeedStartConverting(int size, int addSourceCount, bool isEnabled, bool isInProgress, bool expectedResult,
+            bool expectedIsInProgress)
+        {
+            //ARRANGE
+            var converter = new Converter(size, DefaultWoodPlankReceipt);
+            converter.SetEnabled(isEnabled);
+
+            if (isInProgress)
+            {
+                converter.AddSourceItem(DefaultSourceType, DefaultSourceCount);
+            }
+
+            converter.AddSourceItem(DefaultSourceType, addSourceCount);
+
+            //ACT
+            var result = converter.NeedStartConverting();
+            //ASSERT
+            Assert.AreEqual(expectedResult, result);
+        }
+
+        private static IEnumerable NeedStartConvertingSource1() => new object[]
+        {
+            new object[] { 5, 1, false, false, false, 1, 0, false },
+            new object[] { 10, 5, false, false, false, 5, 0, false },
+            new object[] { 10, 5, true, false, false, 0, 5, true },
+        }.FormatAsObjects(args =>
+            $"Size: {args[0]}; addSourceCount: {args[1]}; isEnabled: {args[2]}; isInProgress: {args[3]}; " +
+            $"expectedResult: {args[4]}; expectedConvertingCount: {args[5]}, eventTriggered: {args[6]}");
+
+        [TestCaseSource(nameof(NeedStartConvertingSource1))]
+        public void NeedStartConverting1(int size, int addSourceCount, bool isEnabled, bool isInProgress, bool expectedResult,
+            int expectedSourceCount, int expectedConvertingCount, bool expectedEventTriggered)
+        {
+            //ARRANGE
+            var converter = new Converter(size, DefaultWoodPlankReceipt);
+            converter.SetEnabled(isEnabled);
+            var eventTriggered = false;
+            converter.OnStartConverting += _ => { eventTriggered = true; };
+
+            if (isInProgress)
+            {
+                converter.AddSourceItem(DefaultSourceType, DefaultSourceCount);
+            }
+
+            converter.AddSourceItem(DefaultSourceType, addSourceCount);
+
+            //ACT
+            var result = converter.NeedStartConverting();
+            //ASSERT
+            Assert.AreEqual(expectedResult, result);
+            Assert.AreEqual(expectedEventTriggered, eventTriggered);
+            Assert.AreEqual(expectedSourceCount, converter.GetSourceItemCount());
+            Assert.AreEqual(expectedConvertingCount, converter.ConvertingCount);
         }
     }
 }
