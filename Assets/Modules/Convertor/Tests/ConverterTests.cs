@@ -2,7 +2,7 @@ using System.Collections;
 using NUnit.Framework;
 using Tests.Editor;
 
-namespace Homework
+namespace Modules.Converter.Tests
 {
     public sealed class ConverterTests
     {
@@ -55,6 +55,13 @@ namespace Homework
             Assert.AreEqual(expectedItemCount, converter.GetSourceItemCount(removeItemType));
             Assert.AreEqual(expectedResult, result);
             Assert.AreEqual(expectedEventTriggered, eventTriggered);
+        }
+
+        [Test]
+        public void Convert()
+        {
+            var converter = new Converter(1, DefaultWoodPlankReceipt);
+            converter.Convert();
         }
     }
 }

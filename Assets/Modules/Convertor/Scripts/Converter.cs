@@ -1,6 +1,8 @@
 using System;
+using System.Runtime.CompilerServices;
 
-namespace Homework
+[assembly: InternalsVisibleTo("Modules.Converter.Tests")]  
+namespace Modules.Converter
 {
     /**
        Конвертер представляет собой преобразователь ресурсов, который берет ресурсы
@@ -24,6 +26,7 @@ namespace Homework
        - Время преобразования ресурсов
        - Состояние: вкл/выкл
      */
+      
     public sealed class Converter
     {
         public event Action<ItemType, int> OnSourceAdded;
@@ -50,6 +53,11 @@ namespace Homework
 
         public void Update(float deltaTime)
         {
+        }
+
+        internal bool Convert()
+        {
+            return true;
         }
 
         public void SetEnabled(bool enabled)

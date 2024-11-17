@@ -2,7 +2,7 @@ using System.Collections;
 using NUnit.Framework;
 using Tests.Editor;
 
-namespace Homework
+namespace Modules.Converter.Tests
 {
     public class StorageTests
     {

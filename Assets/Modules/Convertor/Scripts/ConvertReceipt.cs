@@ -1,4 +1,4 @@
-namespace Homework
+namespace Modules.Converter
 {
     public class ConvertReceipt
     {
