@@ -6,7 +6,13 @@ namespace Modules.Converter.Tests
 {
     public sealed class ConverterTests
     {
-        private static ConvertReceipt DefaultWoodPlankReceipt => new ConvertReceipt(ItemType.Wood, ItemType.Plank, 5, 1, 1);
+        private static readonly ItemType DefaultSourceType = ItemType.Wood;
+        private static readonly ItemType DefaultTargetType = ItemType.Plank;
+        private static readonly int DefaultSourceCount = 5;
+        private static readonly int DefaultTargetCount = 1;
+        private static readonly int DefaultTime = 1;
+        private static ConvertReceipt DefaultWoodPlankReceipt =>
+            new ConvertReceipt(DefaultSourceType, DefaultTargetType, DefaultSourceCount, DefaultTargetCount, DefaultTime);
 
         private static IEnumerable AddItemSourceSource() => new object[]
         {
@@ -57,11 +63,36 @@ namespace Modules.Converter.Tests
             Assert.AreEqual(expectedEventTriggered, eventTriggered);
         }
 
-        [Test]
-        public void Convert()
+        private static IEnumerable ConvertSource() => new object[]
         {
-            var converter = new Converter(1, DefaultWoodPlankReceipt);
-            converter.Convert();
+            new object[]
+            {
+                10, ItemType.Wood, 5, ItemType.Plank, 1, 1,
+                5, 1, true, true
+            },
+            new object[]
+            {
+                10, ItemType.Wood, 5, ItemType.Plank, 1, 1,
+                4, 0, false, false
+            },
+        }.FormatAsObjects(args =>
+            $"Size: {args[0]}; sourceType: {args[1]}; sourceCount: {args[2]}; targetType: {args[3]}; targetCount: {args[4]}, time: {args[5]}; " +
+            $"addSourceCount: {args[6]}; expectedTargetCount: {args[7]}; expectedResult: {args[8]}; eventTriggered: {args[9]};");
+
+        [TestCaseSource(nameof(ConvertSource))]
+        public void Convert(int size, ItemType sourceType, int sourceCount, ItemType targetType, int targetCount, float time, int addSourceCount,
+            int expectedTargetCount, bool expectedResult, bool expectedEventTriggered)
+        {
+            var converter = new Converter(size, new ConvertReceipt(sourceType, targetType, sourceCount, targetCount, time));
+            converter.AddSourceItem(sourceType, addSourceCount);
+            var eventTriggered = false;
+            converter.OnConverted += (_, _) => { eventTriggered = true; };
+
+            var result = converter.Convert();
+
+            Assert.AreEqual(expectedResult, result);
+            Assert.AreEqual(expectedEventTriggered, eventTriggered);
+            Assert.AreEqual(expectedTargetCount, converter.GetTargetItemCount(targetType));
         }
     }
 }

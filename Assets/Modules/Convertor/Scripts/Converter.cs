@@ -1,7 +1,8 @@
 using System;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Modules.Converter.Tests")]  
+[assembly: InternalsVisibleTo("Modules.Converter.Tests")]
+
 namespace Modules.Converter
 {
     /**
@@ -26,16 +27,15 @@ namespace Modules.Converter
        - Время преобразования ресурсов
        - Состояние: вкл/выкл
      */
-      
     public sealed class Converter
     {
         public event Action<ItemType, int> OnSourceAdded;
         public event Action<ItemType, int> OnSourceRemoved;
-        public event Action<ItemType, int> OnConvertedRemoved;
+        public event Action<ItemType, int> OnTargetRemoved;
         public event Action<ItemType, int> OnConverted;
         public event Action<bool> OnEnableChanged;
 
-        private Storage _convertedStorage;
+        private Storage _targetStorage;
         private Storage _sourceStorage;
         private float _couldDown;
         private bool _enabled;
@@ -43,10 +43,11 @@ namespace Modules.Converter
 
         public bool IsEnabled => _enabled;
         public float Time => _receipt.Time;
+        public int MaxSize => _targetStorage.MaxSize;
 
         public Converter(int maxSize, ConvertReceipt receipt)
         {
-            _convertedStorage = new Storage(maxSize);
+            _targetStorage = new Storage(maxSize);
             _sourceStorage = new Storage(maxSize);
             _receipt = receipt;
         }
@@ -57,6 +58,18 @@ namespace Modules.Converter
 
         internal bool Convert()
         {
+            if (!CanConvert()) return false;
+
+            _sourceStorage.RemoveItem(_receipt.SourceType, _receipt.SourceCount);
+            _targetStorage.AddItem(_receipt.TargetType, _receipt.TargetCount);
+            OnConverted?.Invoke(_receipt.TargetType, _receipt.TargetCount);
+            return true;
+        }
+
+        internal bool CanConvert()
+        {
+            if (GetSourceItemCount() < _receipt.SourceCount) return false;
+            if (GetTargetItemCount() + _receipt.TargetCount > MaxSize) return false;
             return true;
         }
 
@@ -80,9 +93,24 @@ namespace Modules.Converter
             return returnCount;
         }
 
+        public int GetSourceItemCount()
+        {
+            return _sourceStorage.GetItemCount(_receipt.SourceType);
+        }
+
         public int GetSourceItemCount(ItemType itemType)
         {
             return _sourceStorage.GetItemCount(itemType);
+        }
+
+        public int GetTargetItemCount(ItemType targetType)
+        {
+            return _targetStorage.GetItemCount(targetType);
+        }
+
+        public int GetTargetItemCount()
+        {
+            return _sourceStorage.GetItemCount(_receipt.TargetType);
         }
 
         public bool RemoveSourceItem(ItemType itemType, int count)

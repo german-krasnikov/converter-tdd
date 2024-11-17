@@ -3,23 +3,23 @@ namespace Modules.Converter
     public class ConvertReceipt
     {
         private ItemType _sourceType;
-        private ItemType _convertType;
+        private ItemType _targetType;
         private int _sourceCount;
-        private int _convertCount;
+        private int _targetCount;
         private float _time;
 
         public ItemType SourceType => _sourceType;
-        public ItemType ConvertType => _convertType;
+        public ItemType TargetType => _targetType;
         public int SourceCount => _sourceCount;
-        public int ConvertCount => _convertCount;
+        public int TargetCount => _targetCount;
         public float Time => _time;
 
-        public ConvertReceipt(ItemType sourceType, ItemType convertType, int sourceCount, int convertCount, float time)
+        public ConvertReceipt(ItemType sourceType, ItemType targetType, int sourceCount, int targetCount, float time)
         {
             _sourceType = sourceType;
-            _convertType = convertType;
+            _targetType = targetType;
             _sourceCount = sourceCount;
-            _convertCount = convertCount;
+            _targetCount = targetCount;
             _time = time;
         }
     }

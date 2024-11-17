@@ -5,6 +5,8 @@ namespace Modules.Converter
 {
     public class Storage
     {
+        public int MaxSize => _maxSize;
+        
         private Dictionary<ItemType, int> _items = new();
         private int _maxSize;
 
