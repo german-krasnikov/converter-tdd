@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using NUnit.Framework;
 using Tests.Editor;
@@ -39,6 +40,22 @@ namespace Modules.Converter.Tests
 
             Assert.AreEqual(expectedItemCount, storage.GetItemCount(ItemType.Wood));
             Assert.AreEqual(expectedResult, result);
+        }
+        
+        [TestCase(-1)]
+        public void WhenAddIncorrectCountThenException(int addCount)
+        {
+            var storage = new Storage(1);
+
+            Assert.Throws<ArgumentException>(() => storage.AddItem(ItemType.Wood, addCount));
+        }
+        
+        [TestCase(-1)]
+        public void WhenRemoveIncorrectCountThenException(int addCount)
+        {
+            var storage = new Storage(1);
+
+            Assert.Throws<ArgumentException>(() => storage.RemoveItem(ItemType.Wood, addCount));
         }
     }
 }

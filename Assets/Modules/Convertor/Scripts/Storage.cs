@@ -6,7 +6,7 @@ namespace Modules.Converter
     public class Storage
     {
         public int MaxSize => _maxSize;
-        
+
         private Dictionary<ItemType, int> _items = new();
         private int _maxSize;
 
@@ -17,6 +17,7 @@ namespace Modules.Converter
 
         public int AddItem(ItemType item, int count)
         {
+            if (count < 0) throw new ArgumentException();
             var addedCount = Math.Min(count, _maxSize - GetItemCount(item) - Count());
             _items.Add(item, addedCount);
             return count - addedCount;
@@ -30,6 +31,7 @@ namespace Modules.Converter
 
         public bool RemoveItem(ItemType item, int removeCount)
         {
+            if (removeCount < 0) throw new ArgumentException();
             var count = GetItemCount(item);
             if (removeCount > count) return false;
             _items[item] -= removeCount;
