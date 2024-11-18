@@ -342,5 +342,39 @@ namespace Modules.Converter.Tests
             Assert.AreEqual(onSourceAddedTriggered, true);
             Assert.AreEqual(onConvertedTriggered, true);
         }
+
+        [Test]
+        public void WhenFullTargetStorageAndEnoughtSourceItems_ThenDoesNotStartConverting()
+        {
+            var size = 5;
+            var sourceStorage = new Storage(size);
+            var targetStorage = new Storage(size);
+            var converter = new Converter(size, DefaultWoodPlankReceipt, sourceStorage, targetStorage, 0);
+            sourceStorage.AddItem(DefaultSourceType, size);
+            targetStorage.AddItem(DefaultTargetType, size);
+            converter.SetEnabled(true);
+            
+            converter.Update(DefaultTime);
+
+            Assert.AreEqual(size, converter.GetSourceItemCount());
+            Assert.AreEqual(0, converter.ConvertingCount);
+        }
+        
+        [Test]
+        public void WhenFullTargetStorageAndEnoughtSourceItemsAndRemoveOneTargetItem_ThenShouldStartConverting()
+        {
+            var size = DefaultSourceCount;
+            var sourceStorage = new Storage(size);
+            var targetStorage = new Storage(size);
+            var converter = new Converter(size, DefaultWoodPlankReceipt, sourceStorage, targetStorage, 0);
+            sourceStorage.AddItem(DefaultSourceType, size);
+            targetStorage.AddItem(DefaultTargetType, size);
+            converter.SetEnabled(true);
+            
+            converter.RemoveTargetItem(DefaultTargetType,1);
+
+            Assert.AreEqual(0, converter.GetSourceItemCount());
+            Assert.AreEqual(size, converter.ConvertingCount);
+        }
     }
 }

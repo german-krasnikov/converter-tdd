@@ -142,6 +142,8 @@ namespace Modules.Converter
 
             return result;
         }
+        
+        public bool RemoveSourceItem(int count) => RemoveSourceItem(_receipt.SourceType, count);
 
         public bool RemoveTargetItem(ItemType itemType, int count)
         {
@@ -153,9 +155,12 @@ namespace Modules.Converter
                 OnTargetRemoved?.Invoke(itemType, count);
             }
 
+            CheckStartConverting();
             return result;
         }
         
+        public bool RemoveTargetItem(int count) => RemoveTargetItem(_receipt.TargetType, count);
+
         internal bool Convert()
         {
             if (!CanConvert()) return false;
