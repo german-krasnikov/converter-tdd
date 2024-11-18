@@ -45,6 +45,8 @@ namespace Modules.Converter
         public bool IsEnabled => _enabled;
         public int MaxSize => _targetStorage.MaxSize;
         public bool IsInProgress => _enabled && ConvertingCount != 0;
+        public ConvertReceipt Receipt => _receipt;
+        public float CouldDownTime => _couldDown.Time;
 
         public Converter(int maxSize, ConvertReceipt receipt)
         {
@@ -65,7 +67,7 @@ namespace Modules.Converter
 
         public void Update(float deltaTime)
         {
-            if (!_enabled) return;
+            if (!IsInProgress) return;
             _couldDown.Tick(deltaTime);
         }
 

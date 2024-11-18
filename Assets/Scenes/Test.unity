@@ -1847,6 +1847,7 @@ GameObject:
   - component: {fileID: 1091061779}
   - component: {fileID: 1091061778}
   - component: {fileID: 1091061780}
+  - component: {fileID: 1091061781}
   m_Layer: 5
   m_Name: Convertor
   m_TagString: Untagged
@@ -1942,6 +1943,19 @@ MonoBehaviour:
   _sourceCountText: {fileID: 1854697783}
   _targetCountText: {fileID: 546436063}
   _couldDownText: {fileID: 1662415292}
+  _progess: {fileID: 297309871}
+--- !u!114 &1091061781
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1091061776}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7da51f9906c2b4b8fa69a69b5977bd6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1096996247
 GameObject:
   m_ObjectHideFlags: 0
@@ -2297,7 +2311,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_enableWordWrapping: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}

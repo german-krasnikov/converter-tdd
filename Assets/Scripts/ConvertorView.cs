@@ -41,7 +41,7 @@ public class ConvertorView : MonoBehaviour
 
     public void SetStateText(string text) => _stateText.text = text;
     public void SetSizeText(string text) => _sizeText.text = text;
-    public void SetReceptText(string text) => _receptText.text = text;
+    public void SetReceiptText(string text) => _receptText.text = text;
     public void SetSourceCountText(string text) => _sourceCountText.text = text;
     public void SetTargetCountText(string text) => _targetCountText.text = text;
     public void SetCouldDownText(string text) => _couldDownText.text = text;

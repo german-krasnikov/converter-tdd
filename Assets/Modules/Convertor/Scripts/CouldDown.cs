@@ -9,10 +9,13 @@ namespace Modules.Converter
         private float _time;
         private float _interval;
 
+        public float Time => _time;
+
         public CouldDown(float interval)
         {
             if (interval <= 0) throw new ArgumentException();
             _interval = interval;
+            _time = 0;
         }
 
         public void Tick(float deltaTime)
