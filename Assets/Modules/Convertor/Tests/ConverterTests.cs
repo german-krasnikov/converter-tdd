@@ -215,10 +215,31 @@ namespace Modules.Converter.Tests
             Assert.AreEqual(expectedConvertingCount, converter.ConvertingCount);
         }
 
-        [Test]
-        public void Stop()
+        private static IEnumerable StopSource() => new object[]
         {
-            Assert.AreEqual(true, false);
+            new object[] { 5, 0, 0, true, 0, false },
+            new object[] { 5, 5, 0, true, 5, true },
+            new object[] { 5, 5, 5, true, 5, true },
+            new object[] { 5, 0, 5, false, 5, false },
+        }.FormatAsObjects(args =>
+            $"Size: {args[0]}; converting: {args[1]}; Source: {args[2]}; isEnabled: {args[3]}; expectedSourceCount: {args[4]}; eventTriggered: {args[5]}");
+
+        [TestCaseSource(nameof(StopSource))]
+        public void Stop(int size, int convertingCount, int sourceCount, bool isEnabled, int expectedSourceCount, bool expectedEventTriggered)
+        {
+            var sourceStorage = new Storage(size);
+            var targetStorage = new Storage(size);
+            var converter = new Converter(size, DefaultWoodPlankReceipt, sourceStorage, targetStorage, convertingCount);
+            converter.SetEnabled(true);
+            sourceStorage.AddItem(DefaultSourceType, sourceCount);
+            var eventTriggered = false;
+            converter.OnStopConverting += _ => { eventTriggered = true; };
+
+            converter.SetEnabled(false);
+
+            Assert.AreEqual(expectedSourceCount, converter.GetSourceItemCount());
+            Assert.AreEqual(expectedEventTriggered, eventTriggered);
+            Assert.AreEqual(0, converter.ConvertingCount);
         }
 
         private static IEnumerable CanConvertSource() => new object[]

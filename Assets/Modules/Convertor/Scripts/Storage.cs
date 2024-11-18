@@ -18,7 +18,7 @@ namespace Modules.Converter
         public int AddItem(ItemType item, int count)
         {
             if (count < 0) throw new ArgumentException();
-            var addedCount = Math.Min(count, _maxSize - GetItemCount(item) - Count());
+            var addedCount = Math.Min(count, _maxSize - Count());
 
             if (!_items.TryAdd(item, addedCount))
             {

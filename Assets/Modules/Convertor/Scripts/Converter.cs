@@ -156,7 +156,7 @@ namespace Modules.Converter
         {
             _couldDown.Reset();
 
-            if (IsInProgress)
+            if (ConvertingCount > 0)
             {
                 _sourceStorage.AddItem(_receipt.SourceType, _convertingCount);
                 _convertingCount = 0;
