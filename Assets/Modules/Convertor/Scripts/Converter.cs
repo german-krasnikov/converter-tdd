@@ -141,6 +141,19 @@ namespace Modules.Converter
             return result;
         }
 
+        public bool RemoveTargetItem(ItemType itemType, int count)
+        {
+            if (itemType != _receipt.TargetType) return false;
+            var result = _targetStorage.RemoveItem(itemType, count);
+
+            if (result)
+            {
+                OnTargetRemoved?.Invoke(itemType, count);
+            }
+
+            return result;
+        }
+        
         internal bool Convert()
         {
             if (!CanConvert()) return false;

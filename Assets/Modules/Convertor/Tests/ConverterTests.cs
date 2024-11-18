@@ -90,29 +90,31 @@ namespace Modules.Converter.Tests
             Assert.AreEqual(expectedEventTriggered, eventTriggered);
         }
 
-        private static IEnumerable RemoveItemTargetSource() => new object[]
+        private static IEnumerable RemoveTargetItemSource() => new object[]
         {
-            new object[] { 5, DefaultWoodPlankReceipt, ItemType.Wood, 5, ItemType.Wood, 5, 0, true, true },
-            new object[] { 5, DefaultWoodPlankReceipt, ItemType.Wood, 5, ItemType.Wood, 6, 5, false, false },
-            new object[] { 5, DefaultWoodPlankReceipt, ItemType.Wood, 0, ItemType.Wood, 1, 0, false, false },
-            new object[] { 5, DefaultWoodPlankReceipt, ItemType.Wood, 5, ItemType.Plank, 1, 0, false, false },
+            new object[] { 5, DefaultWoodPlankReceipt, 5, ItemType.Plank, 5, 0, true, true },
+            new object[] { 5, DefaultWoodPlankReceipt, 5, ItemType.Plank, 6, 5, false, false },
+            new object[] { 5, DefaultWoodPlankReceipt, 0, ItemType.Plank, 1, 0, false, false },
+            new object[] { 5, DefaultWoodPlankReceipt, 5, ItemType.Wood, 1, 0, false, false },
         }.FormatAsObjects(args =>
             $"Size: {args[0]}; SourceItemType: {args[2]}; SourceCount: {args[3]}; RemoveCount: {args[4]}; " +
             $"ExpectedItemCount: {args[5]}; ExpectedResult: {args[6]}, EventTriggered: {args[7]}");
 
-        [TestCaseSource(nameof(RemoveItemTargetSource))]
-        public void RemoveItemTargetSource(int size, ConvertReceipt receipt, ItemType sourceItemType, int sourceCount, ItemType removeItemType,
+        [TestCaseSource(nameof(RemoveTargetItemSource))]
+        public void RemoveTargetItem(int size, ConvertReceipt receipt, int targetCount, ItemType removeItemType,
             int removeCount, int expectedItemCount, bool expectedResult, bool expectedEventTriggered)
         {
-            var converter = new Converter(size, DefaultWoodPlankReceipt);
+            var sourceStorage = new Storage(size);
+            var targetStorage = new Storage(size);
+            var converter = new Converter(size, DefaultWoodPlankReceipt, sourceStorage, targetStorage, 0);
+            converter.SetEnabled(true);
+            targetStorage.AddItem(DefaultTargetType, targetCount);
             var eventTriggered = false;
-            converter.SetEnabled(false);
             converter.OnTargetRemoved += (_, _) => { eventTriggered = true; };
-            converter.AddSourceItem(sourceItemType, sourceCount);
 
-            var result = converter.RemoveSourceItem(removeItemType, removeCount);
+            var result = converter.RemoveTargetItem(removeItemType, removeCount);
 
-            Assert.AreEqual(expectedItemCount, converter.GetSourceItemCount(removeItemType));
+            Assert.AreEqual(expectedItemCount, converter.GetTargetItemCount(removeItemType));
             Assert.AreEqual(expectedResult, result);
             Assert.AreEqual(expectedEventTriggered, eventTriggered);
         }
