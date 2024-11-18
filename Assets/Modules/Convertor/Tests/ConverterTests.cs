@@ -90,6 +90,33 @@ namespace Modules.Converter.Tests
             Assert.AreEqual(expectedEventTriggered, eventTriggered);
         }
 
+        private static IEnumerable RemoveItemTargetSource() => new object[]
+        {
+            new object[] { 5, DefaultWoodPlankReceipt, ItemType.Wood, 5, ItemType.Wood, 5, 0, true, true },
+            new object[] { 5, DefaultWoodPlankReceipt, ItemType.Wood, 5, ItemType.Wood, 6, 5, false, false },
+            new object[] { 5, DefaultWoodPlankReceipt, ItemType.Wood, 0, ItemType.Wood, 1, 0, false, false },
+            new object[] { 5, DefaultWoodPlankReceipt, ItemType.Wood, 5, ItemType.Plank, 1, 0, false, false },
+        }.FormatAsObjects(args =>
+            $"Size: {args[0]}; SourceItemType: {args[2]}; SourceCount: {args[3]}; RemoveCount: {args[4]}; " +
+            $"ExpectedItemCount: {args[5]}; ExpectedResult: {args[6]}, EventTriggered: {args[7]}");
+
+        [TestCaseSource(nameof(RemoveItemTargetSource))]
+        public void RemoveItemTargetSource(int size, ConvertReceipt receipt, ItemType sourceItemType, int sourceCount, ItemType removeItemType,
+            int removeCount, int expectedItemCount, bool expectedResult, bool expectedEventTriggered)
+        {
+            var converter = new Converter(size, DefaultWoodPlankReceipt);
+            var eventTriggered = false;
+            converter.SetEnabled(false);
+            converter.OnTargetRemoved += (_, _) => { eventTriggered = true; };
+            converter.AddSourceItem(sourceItemType, sourceCount);
+
+            var result = converter.RemoveSourceItem(removeItemType, removeCount);
+
+            Assert.AreEqual(expectedItemCount, converter.GetSourceItemCount(removeItemType));
+            Assert.AreEqual(expectedResult, result);
+            Assert.AreEqual(expectedEventTriggered, eventTriggered);
+        }
+
         private static IEnumerable ConvertSource() => new object[]
         {
             new object[]
@@ -189,12 +216,6 @@ namespace Modules.Converter.Tests
         }
 
         [Test]
-        public void RemoveTarget()
-        {
-            Assert.AreEqual(true, false);
-        }
-
-        [Test]
         public void Stop()
         {
             Assert.AreEqual(true, false);
@@ -206,10 +227,30 @@ namespace Modules.Converter.Tests
             Assert.AreEqual(true, false);
         }
 
-        [Test]
-        public void CanConvertNext()
+        private static IEnumerable CanConvertNextSource() => new object[]
         {
-            Assert.AreEqual(true, false);
+            new object[] { 5, 0, 0, 5, true, true },
+            new object[] { 5, 0, 0, 4, true, false },
+            new object[] { 5, 0, 5, 5, true, false },
+            new object[] { 5, 0, 0, 5, false, false },
+            new object[] { 5, 5, 0, 5, true, false },
+            new object[] { 5, 4, 0, 5, true, true },
+        }.FormatAsObjects(args =>
+            $"Size: {args[0]}; target: {args[1]}; converting: {args[2]}; source: {args[3]}; isEnabled: {args[4]}; expectedResult: {args[5]}");
+
+        [TestCaseSource(nameof(CanConvertNextSource))]
+        public void CanConvertNext(int size, int targetCount, int convertingCount, int addSourceCount, bool isEnabled, bool expectedResult)
+        {
+            var sourceStorage = new Storage(size);
+            var targetStorage = new Storage(size);
+            var converter = new Converter(10, DefaultWoodPlankReceipt, sourceStorage, targetStorage, convertingCount);
+            converter.SetEnabled(isEnabled);
+            sourceStorage.AddItem(DefaultSourceType, addSourceCount);
+            targetStorage.AddItem(DefaultTargetType, targetCount);
+
+            var result = converter.CanConvertNext();
+
+            Assert.AreEqual(expectedResult, result);
         }
 
         [Test]

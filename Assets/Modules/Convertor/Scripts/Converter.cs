@@ -31,6 +31,7 @@ namespace Modules.Converter
         public event Action<ItemType, int> OnTargetRemoved;
         public event Action<ConvertReceipt> OnConverted;
         public event Action<ConvertReceipt> OnStartConverting;
+        public event Action<ConvertReceipt> OnStopConverting;
         public event Action<bool> OnEnableChanged;
 
         private Storage _targetStorage;
@@ -52,6 +53,14 @@ namespace Modules.Converter
             _receipt = receipt;
             _couldDown = new CouldDown(receipt.Time);
             _couldDown.OnComplete += CouldDown;
+        }
+
+        internal Converter(int maxSize, ConvertReceipt receipt, Storage sourceStorage, Storage targetStorage, int convertingCount)
+            : this(maxSize, receipt)
+        {
+            _sourceStorage = sourceStorage;
+            _targetStorage = targetStorage;
+            _convertingCount = convertingCount;
         }
 
         public void Update(float deltaTime)
@@ -151,6 +160,7 @@ namespace Modules.Converter
             {
                 _sourceStorage.AddItem(_receipt.SourceType, _convertingCount);
                 _convertingCount = 0;
+                OnStopConverting?.Invoke(_receipt);
             }
         }
 
@@ -168,11 +178,13 @@ namespace Modules.Converter
 
         internal bool CanConvertNext()
         {
+            if (!IsEnabled) return false;
+            if (IsInProgress) return false;
             if (GetSourceItemCount() < _receipt.SourceCount) return false;
             if (GetTargetItemCount() + _receipt.TargetCount > MaxSize) return false;
             return true;
         }
-        
+
         internal bool CanConvert()
         {
             if (_convertingCount != _receipt.SourceCount) return false;
