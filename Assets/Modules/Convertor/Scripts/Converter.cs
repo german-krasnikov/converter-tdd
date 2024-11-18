@@ -187,6 +187,7 @@ namespace Modules.Converter
 
         internal bool CanConvert()
         {
+            if (!IsEnabled) return false;
             if (_convertingCount != _receipt.SourceCount) return false;
             if (GetTargetItemCount() + _receipt.TargetCount > MaxSize) return false;
             return true;

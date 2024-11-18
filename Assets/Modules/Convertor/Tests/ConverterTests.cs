@@ -221,10 +221,27 @@ namespace Modules.Converter.Tests
             Assert.AreEqual(true, false);
         }
 
-        [Test]
-        public void CanConvert()
+        private static IEnumerable CanConvertSource() => new object[]
         {
-            Assert.AreEqual(true, false);
+            new object[] { 5, 0, 0, true, false },
+            new object[] { 5, 0, 5, true, true },
+            new object[] { 5, 0, 5, false, false },
+            new object[] { 5, 5, 5, true, false },
+        }.FormatAsObjects(args =>
+            $"Size: {args[0]}; target: {args[1]}; converting: {args[2]}; isEnabled: {args[3]}; expectedResult: {args[4]}");
+
+        [TestCaseSource(nameof(CanConvertSource))]
+        public void CanConvert(int size, int targetCount, int convertingCount, bool isEnabled, bool expectedResult)
+        {
+            var sourceStorage = new Storage(size);
+            var targetStorage = new Storage(size);
+            var converter = new Converter(size, DefaultWoodPlankReceipt, sourceStorage, targetStorage, convertingCount);
+            converter.SetEnabled(isEnabled);
+            targetStorage.AddItem(DefaultTargetType, targetCount);
+
+            var result = converter.CanConvert();
+
+            Assert.AreEqual(expectedResult, result);
         }
 
         private static IEnumerable CanConvertNextSource() => new object[]
@@ -243,7 +260,7 @@ namespace Modules.Converter.Tests
         {
             var sourceStorage = new Storage(size);
             var targetStorage = new Storage(size);
-            var converter = new Converter(10, DefaultWoodPlankReceipt, sourceStorage, targetStorage, convertingCount);
+            var converter = new Converter(size, DefaultWoodPlankReceipt, sourceStorage, targetStorage, convertingCount);
             converter.SetEnabled(isEnabled);
             sourceStorage.AddItem(DefaultSourceType, addSourceCount);
             targetStorage.AddItem(DefaultTargetType, targetCount);
